@@ -1,6 +1,7 @@
 package musicservice.s3;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,12 +16,14 @@ import java.util.List;
 @RestController
 public class S3Controller {
 
+    @Value("${aws.s3.bucket}")
+    private String bucket;
+
     @Autowired
     private S3Client s3Client;
 
     @GetMapping("/api/files")
     public ResponseEntity<List<FileInfo>> listFiles(
-            @RequestParam String bucket,
             @RequestParam(required = false) String prefix,
             @RequestParam(required = false, defaultValue = "1000") int maxKeys
     ) {
