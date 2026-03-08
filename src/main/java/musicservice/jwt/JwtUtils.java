@@ -1,9 +1,8 @@
 package musicservice.jwt;
 
-import io.jsonwebtoken.JwtBuilder;
-import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
-import musicservice.user.User;
+import musicservice.auth.AuthResponse;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -28,23 +27,51 @@ public class JwtUtils {
         this.refreshTokenExpiration = refreshTokenExpiration;
     }
 
-    public String generateAccessToken(User user) {
+    public String generateToken(String email, char type) {
+
+        int exp = 0;
+
+        if (type == 'a') {
+            exp = accessTokenExpiration;
+        } else if (type == 'r') {
+            exp = refreshTokenExpiration;
+        }
+
         return Jwts.builder()
-                .subject(user.email())
-                .claim("username", user.username())
+                .subject(email)
                 .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + accessTokenExpiration))
+                .expiration(new Date(System.currentTimeMillis() + exp))
                 .signWith(key)
                 .compact();
     }
 
-    public String generateRefreshToken(User user) {
-        return Jwts.builder()
-                .subject(user.email())
-                .claim("username", user.username())
-                .issuedAt(new Date())
-                .expiration(new Date(System.currentTimeMillis() + refreshTokenExpiration))
-                .signWith(key)
-                .compact();
+
+    public AuthResponse generateTokens(String email) {
+        String access = generateToken(email, 'a');
+        String refresh = generateToken(email, 'r');
+
+        return new AuthResponse(access, refresh);
+    }
+
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser()
+                    .verifyWith(key)
+                    .build()
+                    .parseSignedClaims(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+
+    public String getEmailFromToken(String token) {
+        return Jwts.parser()
+                .verifyWith(key)
+                .build()
+                .parseSignedClaims(token)
+                .getPayload()
+                .getSubject();
     }
 }

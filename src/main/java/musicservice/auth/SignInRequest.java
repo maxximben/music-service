@@ -1,4 +1,4 @@
-package musicservice.account;
+package musicservice.auth;
 
 public record SignInRequest (
         String email,

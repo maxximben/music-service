@@ -1,5 +1,6 @@
 package musicservice.tests;
 
+import musicservice.account.AccountRepository;
 import musicservice.jwt.JwtUtils;
 import musicservice.s3.S3Service;
 import musicservice.track.Track;
@@ -38,21 +39,23 @@ public class TestController {
 
     @Autowired
     private S3Service s3Service;
+    @Autowired
+    private AccountRepository accountRepository;
 
-    @PostMapping("/userSaveTest")
-    public void savaUser(@RequestBody User user) {
-        accountService.save(user);
-    }
+//    @PostMapping("/userSaveTest")
+//    public void savaUser(@RequestBody User user) {
+//        accountService.save(user);
+//    }
 
     @GetMapping("findAll")
     public List<User> findAll() {
         return accountService.findAll();
     }
 
-    @GetMapping("/token")
-    public String getToken(@RequestBody User user) {
-        return jwtUtils.generateAccessToken(user);
-    }
+//    @GetMapping("/token")
+//    public String getToken(@RequestBody User user) {
+//        return jwtUtils.generateAccessToken(user);
+//    }
 
     @GetMapping("/getTrackById")
     public String getTrackById(@RequestParam int id) {
@@ -106,5 +109,10 @@ public class TestController {
     @PostMapping("upload-image")
     public void uploadImage(@RequestParam("file")MultipartFile file) throws IOException {
         s3Service.uploadImage(file);
+    }
+
+    @GetMapping("/find-by-email")
+    public User findByEmail(@RequestParam String email) {
+        return accountRepository.findByEmail(email);
     }
 }

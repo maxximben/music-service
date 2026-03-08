@@ -1,14 +1,18 @@
 package musicservice.account;
 
+import musicservice.auth.SignUpRequest;
 import musicservice.user.User;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
-
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import java.util.List;
 
 @Repository
 public class AccountRepository {
+
+    private final PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(12);
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -16,14 +20,24 @@ public class AccountRepository {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public void save(User user) {
-        String query = "insert into users (username, avatar, password, is_artist, email) values (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(query, user.username(), user.avatar(), user.password(), user.isArtist(), user.email());
+    public void save(SignUpRequest request) {
+        String query = "insert into users (username, password, is_artist, email) values (?, ?, ?, ?)";
+
+        String password = request.password();
+
+        String hashed = passwordEncoder.encode(password);
+
+        jdbcTemplate.update(query, request.username(), hashed, false, request.email());
     }
 
     public List<User> findAll() {
         String query = "select * from users";
         return jdbcTemplate.query(query, userRawMapper());
+    }
+
+    public User findByEmail(String email) {
+        String query = "select * from users where email = ?";
+        return jdbcTemplate.queryForObject(query, userRawMapper(), email);
     }
 
     private RowMapper<User> userRawMapper() {
