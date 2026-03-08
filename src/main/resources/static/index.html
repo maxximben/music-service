@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <title>Плеер — по ID трека</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacOSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #121212;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 40px;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #1e1e1e;
+            padding: 32px;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.5);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 32px;
+            color: #1db954;
+        }
+        .form-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        input[type="number"] {
+            flex: 1;
+            padding: 14px 16px;
+            font-size: 18px;
+            border: 1px solid #444;
+            border-radius: 8px;
+            background: #282828;
+            color: white;
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 1;
+        }
+        button {
+            padding: 0 28px;
+            font-size: 17px;
+            background: #1db954;
+            color: black;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        button:hover {
+            background: #1ed760;
+            transform: translateY(-1px);
+        }
+        button:active {
+            transform: translateY(0);
+        }
+        audio {
+            width: 100%;
+            margin-top: 28px;
+            filter: brightness(0.9);
+        }
+        #status {
+            margin-top: 16px;
+            text-align: center;
+            color: #b3b3b3;
+            min-height: 1.4em;
+        }
+        .error {
+            color: #ff5555 !important;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>Воспроизвести трек</h1>
+
+    <div class="form-row">
+        <input type="number" id="trackId" placeholder="Введите ID трека" min="1" value="1" />
+        <button onclick="loadTrack()">Играть</button>
+    </div>
+
+    <audio id="player" controls></audio>
+    <div id="status">Введите ID и нажмите «Играть»</div>
+</div>
+
+<script>
+    const player = document.getElementById('player');
+    const status = document.getElementById('status');
+    const input = document.getElementById('trackId');
+
+    function loadTrack() {
+        const id = input.value.trim();
+        if (!id || isNaN(id) || id < 1) {
+            status.textContent = 'Введите корректный ID (число ≥ 1)';
+            status.className = 'error';
+            return;
+        }
+
+        status.textContent = `Загружаю трек #${id}...`;
+        status.className = '';
+
+        // Ваш endpoint
+        const url = `/play?id=${id}`;
+
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Сервер ответил ${response.status}`);
+                }
+                return response.text();
+            })
+            .then(data => {
+                // предполагаем, что контроллер возвращает прямую ссылку на аудиофайл
+                player.src = data.trim();
+                player.load();
+                player.play().catch(e => {
+                    console.error(e);
+                    status.textContent = 'Не удалось начать воспроизведение (возможно, автоплей заблокирован)';
+                });
+                status.textContent = `Играет трек #${id}`;
+            })
+            .catch(err => {
+                console.error(err);
+                status.textContent = 'Ошибка: ' + err.message;
+                status.className = 'error';
+                player.src = '';
+            });
+    }
+
+    // Запуск по нажатию Enter в поле ввода
+    input.addEventListener('keypress', e => {
+        if (e.key === 'Enter') {
+            loadTrack();
+        }
+    });
+
+    // Можно сразу загрузить первый трек при открытии страницы (опционально)
+    // window.addEventListener('load', () => loadTrack());
+</script>
+
+</body>
+</html>

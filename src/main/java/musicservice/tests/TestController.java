@@ -1,20 +1,43 @@
 package musicservice.tests;
 
+import musicservice.jwt.JwtUtils;
+import musicservice.s3.S3Service;
+import musicservice.track.Track;
+import musicservice.track.TrackRepository;
 import musicservice.user.User;
 import musicservice.account.AccountService;
+import org.jaudiotagger.audio.AudioFile;
+import org.jaudiotagger.audio.AudioFileIO;
+import org.jaudiotagger.audio.exceptions.CannotReadException;
+import org.jaudiotagger.audio.exceptions.InvalidAudioFrameException;
+import org.jaudiotagger.audio.exceptions.ReadOnlyFileException;
+import org.jaudiotagger.tag.FieldKey;
+import org.jaudiotagger.tag.Tag;
+import org.jaudiotagger.tag.TagException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 public class TestController {
 
     @Autowired
     private AccountService accountService;
+
+    @Autowired
+    private JwtUtils jwtUtils;
+
+    @Autowired
+    private TrackRepository trackRepository;
+
+    @Autowired
+    private S3Service s3Service;
 
     @PostMapping("/userSaveTest")
     public void savaUser(@RequestBody User user) {
@@ -24,5 +47,64 @@ public class TestController {
     @GetMapping("findAll")
     public List<User> findAll() {
         return accountService.findAll();
+    }
+
+    @GetMapping("/token")
+    public String getToken(@RequestBody User user) {
+        return jwtUtils.generateAccessToken(user);
+    }
+
+    @GetMapping("/getTrackById")
+    public String getTrackById(@RequestParam int id) {
+        return trackRepository.getTrackById(id);
+    }
+
+    @DeleteMapping("/deleteTrackById")
+    public void deleteTrackById(@RequestParam int id) {
+        trackRepository.deleteById(id);
+    }
+
+    @PostMapping("upload-audio")
+    public void uploadAudio(@RequestParam("file")MultipartFile file, @RequestParam int userid) throws IOException, CannotReadException, TagException, InvalidAudioFrameException, ReadOnlyFileException {
+
+
+        String url = s3Service.uploadAudio(file);
+
+        File tempFile = File.createTempFile("audio", file.getOriginalFilename());
+        try (FileOutputStream fos = new FileOutputStream(tempFile)) {
+            fos.write(file.getBytes());
+        }
+
+        // Read the audio file and extract metadata
+        AudioFile audioFile = AudioFileIO.read(tempFile);
+        Tag tag = audioFile.getTag();
+
+        // Extract metadata (no further action needed as per request)
+        String title = tag.getFirst(FieldKey.TITLE);
+        String artist = tag.getFirst(FieldKey.ARTIST);
+        String album = tag.getFirst(FieldKey.ALBUM);
+
+        // Extract cover art if available
+        byte[] cover = null;
+        if (tag.getFirstArtwork() != null) {
+            cover = tag.getFirstArtwork().getBinaryData();
+        }
+
+        String coverUrl = null;
+
+        if (cover != null && cover.length > 0) {
+            coverUrl = s3Service.uploadCover(cover, "cover-" + UUID.randomUUID() + ".jpg");
+        }
+
+        Track track = new Track(0, title, userid, album, coverUrl, url);
+
+        tempFile.delete();
+
+        trackRepository.addTrack(track);
+    }
+
+    @PostMapping("upload-image")
+    public void uploadImage(@RequestParam("file")MultipartFile file) throws IOException {
+        s3Service.uploadImage(file);
     }
 }
