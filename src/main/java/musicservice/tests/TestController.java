@@ -42,20 +42,11 @@ public class TestController {
     @Autowired
     private AccountRepository accountRepository;
 
-//    @PostMapping("/userSaveTest")
-//    public void savaUser(@RequestBody User user) {
-//        accountService.save(user);
-//    }
 
     @GetMapping("findAll")
     public List<User> findAll() {
         return accountService.findAll();
     }
-
-//    @GetMapping("/token")
-//    public String getToken(@RequestBody User user) {
-//        return jwtUtils.generateAccessToken(user);
-//    }
 
     @GetMapping("/getTrackById")
     public String getTrackById(@RequestParam int id) {
