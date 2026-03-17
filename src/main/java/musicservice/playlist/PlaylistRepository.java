@@ -22,6 +22,11 @@ public class PlaylistRepository {
         jdbcTemplate.update(query, url, playlistId);
     }
 
+    public void setTitle(String title, int playlistId) {
+        String query = "update playlists set title = ? where playlist_id = ?";
+        jdbcTemplate.update(query, title, playlistId);
+    }
+
 
 
 

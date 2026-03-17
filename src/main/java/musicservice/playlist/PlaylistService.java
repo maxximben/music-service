@@ -17,6 +17,9 @@ public class PlaylistService {
         playlistRepository.setPlaylistCover(url, playlistId);
     }
 
+    public void setTitle(String title, int playlistId) {
+        playlistRepository.setTitle(title, playlistId);
+    }
 
 
 }

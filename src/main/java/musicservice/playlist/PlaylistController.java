@@ -29,6 +29,11 @@ public class PlaylistController {
         playlistService.setPlaylistCover(url, playlistId);
     }
 
+    @PatchMapping("/set-title")
+    public void setTitle(@RequestParam String title, @RequestParam int playlistId) {
+        playlistService.setTitle(title, playlistId);
+    }
+
     @PostMapping("/add")
     public void addSong(@RequestParam int id) {
 
