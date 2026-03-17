@@ -17,6 +17,11 @@ public class PlaylistRepository {
         jdbcTemplate.update(query, title, userId, false, true, 0);
     }
 
+    public void setPlaylistCover(String url, int playlistId) {
+        String query = "update playlists set cover = ? where playlist_id = ?";
+        jdbcTemplate.update(query, url, playlistId);
+    }
+
 
 
 

@@ -39,7 +39,7 @@ public class S3Service {
         return publicUrlPrefix + "/" + key;
     }
 
-    public void uploadImage(MultipartFile file) throws IOException {
+    public String uploadImage(MultipartFile file) throws IOException {
 
         String key = "images/" + file.getOriginalFilename();
 
@@ -51,7 +51,7 @@ public class S3Service {
                 .build();
 
         s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(file.getInputStream(), file.getSize()));
-
+        return publicUrlPrefix + "/" + key;
     }
 
 

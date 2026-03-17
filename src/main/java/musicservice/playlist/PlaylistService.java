@@ -13,6 +13,10 @@ public class PlaylistService {
         playlistRepository.createPlaylist(title, userId);
     }
 
+    public void setPlaylistCover(String url, int playlistId) {
+        playlistRepository.setPlaylistCover(url, playlistId);
+    }
+
 
 
 }
