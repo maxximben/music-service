@@ -26,4 +26,7 @@ public class PlaylistService {
     }
 
 
+    public void deleteSong(int songId, int playlistId) {
+        playlistRepository.deleteSong(songId, playlistId);
+    }
 }

@@ -33,6 +33,8 @@ public class PlaylistRepository {
     }
 
 
-
-
+    public void deleteSong(int songId, int playlistId) {
+        String query = "delete from playlist_songs where playlist_id = ? and song_id = ?";
+        jdbcTemplate.update(query, playlistId, songId);
+    }
 }

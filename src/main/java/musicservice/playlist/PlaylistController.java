@@ -44,8 +44,8 @@ public class PlaylistController {
 
     }
 
-    @DeleteMapping("/delete")
-    public void deletePlaylist(@RequestParam int id) {
-
+    @DeleteMapping("/delete-song")
+    public void deletePlaylist(@RequestParam int songId, @RequestParam int playlistId) {
+        playlistService.deleteSong(songId, playlistId);
     }
 }
