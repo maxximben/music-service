@@ -34,9 +34,9 @@ public class PlaylistController {
         playlistService.setTitle(title, playlistId);
     }
 
-    @PostMapping("/add")
-    public void addSong(@RequestParam int id) {
-
+    @PatchMapping("/add-song")
+    public void addSong(@RequestParam int songId, @RequestParam int playlistId) {
+        playlistService.addSong(songId, playlistId);
     }
 
     @PatchMapping("/update")

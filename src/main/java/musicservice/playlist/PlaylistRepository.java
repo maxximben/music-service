@@ -27,6 +27,11 @@ public class PlaylistRepository {
         jdbcTemplate.update(query, title, playlistId);
     }
 
+    public void addSong(int songId, int playlistId) {
+        String query = "INSERT INTO playlist_songs (playlist_id, song_id, position) SELECT ?, ?, COALESCE(MAX(position), 0) + 1 FROM playlist_songs WHERE playlist_id = ?";
+        jdbcTemplate.update(query, playlistId, songId, playlistId);
+    }
+
 
 
 

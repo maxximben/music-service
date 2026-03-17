@@ -21,5 +21,9 @@ public class PlaylistService {
         playlistRepository.setTitle(title, playlistId);
     }
 
+    public void addSong(int songId, int playlistId) {
+        playlistRepository.addSong(songId, playlistId);
+    }
+
 
 }
