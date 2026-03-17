@@ -10,6 +10,12 @@ public class PlaylistRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    public void createPlaylist(String title, int userId) {
+
+        String query = "insert into playlists (title, user_id, is_album, is_private, count_of_songs) values (?, ?, ?, ?, ?)";
+
+        jdbcTemplate.update(query, title, userId, false, true, 0);
+    }
 
 
 

@@ -1,15 +1,20 @@
 package musicservice.playlist;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
-@RestController("/playlist")
+@RestController
+@RequestMapping("/playlist")
 public class PlaylistController {
 
-    @PostMapping("/create")
-    public void createPlaylist(@RequestBody List<Integer> songs) {
+    @Autowired
+    PlaylistService playlistService;
 
+    @PostMapping("/create")
+    public void createPlaylist(@RequestBody CreatePlaylistRequest request) {
+        playlistService.createPlaylist(request.title(), request.userId());
     }
 
     @PostMapping("/add")
