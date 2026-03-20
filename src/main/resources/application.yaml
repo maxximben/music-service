@@ -2,9 +2,9 @@ spring:
     application:
         name: music-service
     datasource:
-        url: jdbc:postgresql://localhost:5432/postgres
-        username: postgres
-        password: qwerty
+        url: ${DB_URL:}
+        username: ${DB_USERNAME:}
+        password: ${DB_PASSWORD:}
         driver-class-name: org.postgresql.Driver
     servlet:
         multipart:
@@ -17,7 +17,7 @@ aws:
         access-key: ${S3_ACCESS_KEY:}
         secret-key: ${S3_SECRET_KEY:}
         bucket: ${S3_BUCKET:}
-        public-url-prefix: https://s3.twcstorage.ru/dff2fb2a-f4c1-4ba0-a0ef-42aab0ae6870
+        public-url-prefix: ${S3_URL:}
 
 jwt:
     secret: ${JWT_SECRET:}
