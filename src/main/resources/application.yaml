@@ -30,4 +30,3 @@ springdoc:
     swagger-ui:
         path: /swagger-ui.html
         operations-sorter: method
-        url: https://maxximben-music-service-7506.twc1.net
