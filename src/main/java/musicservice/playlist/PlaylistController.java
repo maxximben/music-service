@@ -24,18 +24,18 @@ public class PlaylistController {
     }
 
     @PatchMapping("/set-cover")
-    public void setCover(@RequestParam("file") MultipartFile file, @RequestParam int playlistId) throws IOException {
+    public void setCover(@RequestParam("file") MultipartFile file, @RequestParam int playlistId, @RequestHeader(value = "Authorization") String authHeader) throws IOException {
         String url = s3Service.uploadImage(file);
         playlistService.setPlaylistCover(url, playlistId);
     }
 
     @PatchMapping("/set-title")
-    public void setTitle(@RequestParam String title, @RequestParam int playlistId) {
+    public void setTitle(@RequestParam String title, @RequestParam int playlistId, @RequestHeader(value = "Authorization") String authHeader) {
         playlistService.setTitle(title, playlistId);
     }
 
     @PatchMapping("/add-song")
-    public void addSong(@RequestParam int songId, @RequestParam int playlistId) {
+    public void addSong(@RequestParam int songId, @RequestParam int playlistId, @RequestHeader(value = "Authorization") String authHeader) {
         playlistService.addSong(songId, playlistId);
     }
 
@@ -45,7 +45,10 @@ public class PlaylistController {
     }
 
     @DeleteMapping("/delete-song")
-    public void deletePlaylist(@RequestParam int songId, @RequestParam int playlistId) {
+    public void deletePlaylist(@RequestParam int songId, @RequestParam int playlistId, @RequestHeader(value = "Authorization") String authHeader) {
+
+        String token = authHeader.substring(7);   // доделать
+
         playlistService.deleteSong(songId, playlistId);
     }
 }
