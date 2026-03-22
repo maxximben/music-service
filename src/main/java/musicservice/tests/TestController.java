@@ -3,6 +3,8 @@ package musicservice.tests;
 import musicservice.account.AccountRepository;
 import musicservice.jwt.JwtUtils;
 import musicservice.s3.S3Service;
+import musicservice.song.Song;
+import musicservice.song.SongRepository;
 import musicservice.track.Track;
 import musicservice.track.TrackRepository;
 import musicservice.user.User;
@@ -41,6 +43,9 @@ public class TestController {
     private S3Service s3Service;
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private SongRepository songRepository;
 
 
     @GetMapping("findAll")
@@ -110,5 +115,15 @@ public class TestController {
     @PostMapping("/exist-by-email")
     public boolean exist(@RequestParam String email) {
         return accountRepository.existsByEmail(email);
+    }
+
+    @GetMapping("/get-song-by-id")
+    public Song getSongById(@RequestParam int id) {
+        return songRepository.getSongById(id);
+    }
+
+    @GetMapping("/get-author-by-song-id")
+    public String getAuthorBySongId (@RequestParam int songId) {
+        return songRepository.getAuthorBySongId(songId);
     }
 }

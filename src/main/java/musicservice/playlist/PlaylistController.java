@@ -2,6 +2,7 @@ package musicservice.playlist;
 
 import musicservice.s3.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -51,4 +52,13 @@ public class PlaylistController {
 
         playlistService.deleteSong(songId, playlistId);
     }
+
+//    @GetMapping("/playlist")
+//    public ResponseEntity<?> getPlaylist(@RequestParam int playlistId, @RequestParam(value = "Authorization") String authHeader) {
+//
+//        String token = authHeader.substring(7);
+//
+//
+//
+//    }
 }
