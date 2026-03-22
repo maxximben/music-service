@@ -26,6 +26,13 @@ public class AccountController {
 
     @PostMapping("/sign-up")
     public ResponseEntity<?> signUp(@RequestBody SignUpRequest request) {
+
+        boolean exists = accountRepository.existsByEmail(request.email());
+
+        if (exists) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("email уже занят"));
+        }
+
         accountService.save(request);
         return ResponseEntity.ok(jwtUtils.generateTokens(request.email()));
     }

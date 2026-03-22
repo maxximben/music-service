@@ -106,4 +106,9 @@ public class TestController {
     public User findByEmail(@RequestParam String email) {
         return accountRepository.findByEmail(email);
     }
+
+    @PostMapping("/exist-by-email")
+    public boolean exist(@RequestParam String email) {
+        return accountRepository.existsByEmail(email);
+    }
 }

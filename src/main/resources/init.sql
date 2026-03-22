@@ -4,7 +4,7 @@ CREATE TABLE users(
     avatar      TEXT,
     password    TEXT                   NOT NULL,
     is_artist   BOOLEAN,
-    email       VARCHAR(70)            NOT NULL
+    email       VARCHAR(70)            NOT NULL UNIQUE
 );
 
 CREATE TABLE songs(

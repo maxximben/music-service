@@ -40,6 +40,11 @@ public class AccountRepository {
         return jdbcTemplate.queryForObject(query, userRawMapper(), email);
     }
 
+    public boolean existsByEmail(String email) {
+        String sql = "SELECT EXISTS(SELECT 1 FROM users WHERE email = ?)";
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, email));
+    }
+
     private RowMapper<User> userRawMapper() {
         return (rs, rowNum) -> new User(
                 rs.getString("username"),
