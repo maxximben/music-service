@@ -29,4 +29,8 @@ public class PlaylistService {
     public void deleteSong(int songId, int playlistId) {
         playlistRepository.deleteSong(songId, playlistId);
     }
+
+    public Playlist getPlaylistById(int id) {
+        return playlistRepository.getPlaylistById(id);
+    }
 }

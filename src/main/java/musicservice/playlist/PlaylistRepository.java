@@ -1,7 +1,9 @@
 package musicservice.playlist;
 
+import musicservice.song.SongRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 
 @Repository
@@ -10,10 +12,11 @@ public class PlaylistRepository {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @Autowired
+    private SongRepository songRepository;
+
     public void createPlaylist(String title, int userId) {
-
         String query = "insert into playlists (title, user_id, is_album, is_private, count_of_songs) values (?, ?, ?, ?, ?)";
-
         jdbcTemplate.update(query, title, userId, false, true, 0);
     }
 
@@ -32,12 +35,25 @@ public class PlaylistRepository {
         jdbcTemplate.update(query, playlistId, songId, playlistId);
     }
 
-
     public void deleteSong(int songId, int playlistId) {
         String query = "delete from playlist_songs where playlist_id = ? and song_id = ?";
         jdbcTemplate.update(query, playlistId, songId);
     }
 
+    public Playlist getPlaylistById(int id) {
+        String query = "select * from playlists where playlist_id = ?";
+        return jdbcTemplate.queryForObject(query, playlistRowMapper(), id);
+    }
+
+    public RowMapper<Playlist> playlistRowMapper() {
+        return (rs, rowNum) -> new Playlist(
+                rs.getInt("playlist_id"),
+                rs.getString("title"),
+                rs.getString("cover"),
+                rs.getInt("count_of_songs"),
+                songRepository.findSongsByPlaylistId(rs.getInt("playlist_id"))
+        );
+    }
 
 
 }

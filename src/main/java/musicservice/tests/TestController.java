@@ -2,6 +2,8 @@ package musicservice.tests;
 
 import musicservice.account.AccountRepository;
 import musicservice.jwt.JwtUtils;
+import musicservice.playlist.Playlist;
+import musicservice.playlist.PlaylistRepository;
 import musicservice.s3.S3Service;
 import musicservice.song.Song;
 import musicservice.song.SongRepository;
@@ -47,6 +49,8 @@ public class TestController {
     @Autowired
     private SongRepository songRepository;
 
+    @Autowired
+    private PlaylistRepository playlistRepository;
 
     @GetMapping("findAll")
     public List<User> findAll() {
@@ -125,5 +129,15 @@ public class TestController {
     @GetMapping("/get-author-by-song-id")
     public String getAuthorBySongId (@RequestParam int songId) {
         return songRepository.getAuthorBySongId(songId);
+    }
+
+    @GetMapping("/find-songs-by-playlist-id")
+    public List<Song> findSongsByPlaylistId(@RequestParam int id) {
+        return songRepository.findSongsByPlaylistId(id);
+    }
+
+    @GetMapping("/get-playlist-by-id")
+    public Playlist getPlaylistById(@RequestParam int id) {
+        return playlistRepository.getPlaylistById(id);
     }
 }
