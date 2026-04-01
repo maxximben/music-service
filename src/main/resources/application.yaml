@@ -37,5 +37,5 @@ servers:
     - url: http://localhost:8080
 
 analysis:
-    fastapi-base-url: ${FASTAPI-BASE-URL:}
-    callback-url: ${CALLBACK-URL:}
+    fastapi-base-url: ${FASTAPI_BASE_URL:}
+    callback-url: ${CALLBACK_URL:}
