@@ -36,3 +36,7 @@ servers:
     - url: https://maxximben-music-service-7506.twc1.net/
     - url: http://localhost:8080
 
+analysis:
+    fastapi-base-url: http://127.0.0.1:8000
+    callback-url: http://localhost:8080/webhook/music-result
+

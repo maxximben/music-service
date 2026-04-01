@@ -1,31 +1,50 @@
 package musicservice.webhook;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/webhook")
-
 public class AnalysisWebhookController {
 
-    @Autowired
-    private AnalysisService analysisService;
+    private final AnalysisRepository analysisRepository;
 
-    @PostMapping("/music-result")
-    public ResponseEntity<Void> receiveAnalysisResult(@RequestBody AnalysisResult result) {
-        IO.println("Получен результат");
-        analysisService.saveResult(result);
-        return ResponseEntity.ok().build();   // 200 OK — важно, чтобы FastAPI не считал это ошибкой
+    public AnalysisWebhookController(AnalysisRepository analysisRepository) {
+        this.analysisRepository = analysisRepository;
     }
 
-    // Для отладки / просмотра результата (можно убрать в продакшене или защитить)
-    @GetMapping("/result/{jobId}")
-    public ResponseEntity<AnalysisResult> getResult(@PathVariable String jobId) {
-        AnalysisResult result = analysisService.getResult(jobId);
-        if (result == null) {
-            return ResponseEntity.notFound().build();
+    @PostMapping("/music-result")
+    public ResponseEntity<String> receiveAnalysisResult(@RequestBody AnalysisResult result) {
+
+
+        System.out.println(result.toString());
+
+
+        System.out.println(result.getJobId());
+        Integer songId = analysisRepository.findSongIdByJobId(result.getJobId());
+//        songId = 2;
+
+        System.out.println("получен результат");
+        System.out.println(songId);
+
+        if (songId == null) {
+            return ResponseEntity.status(202).body("Job not found yet: " + result.getJobId());
         }
-        return ResponseEntity.ok(result);
+
+        System.out.println("перед update job status");
+
+        analysisRepository.updateJobStatus(
+                result.getJobId(),
+                result.getStatus(),
+                result.getError()
+        );
+
+        System.out.println("перед if");
+
+        if ("completed".equals(result.getStatus())) {
+            analysisRepository.saveAnalysisResult(songId, result);
+        }
+
+        return ResponseEntity.ok("Webhook processed");
     }
 }
