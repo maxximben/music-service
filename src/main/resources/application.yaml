@@ -37,6 +37,6 @@ servers:
     - url: http://localhost:8080
 
 analysis:
-    fastapi-base-url: http://127.0.0.1:8000
-    callback-url: http://localhost:8080/webhook/music-result
+    fastapi-base-url: https://maxximben-essentia-fastapi-60a2.twc1.net
+    callback-url: https://maxximben-music-service-3f54.twc1.net/webhook/music-result
 
