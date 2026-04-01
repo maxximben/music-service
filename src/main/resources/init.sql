@@ -77,32 +77,25 @@ CREATE TABLE similar_songs(
     PRIMARY KEY (song_id, similar_song_id)
 );
 
-CREATE TABLE songs_vectors(
-    song_id     INTEGER     PRIMARY KEY
-      REFERENCES songs(song_id)
-          ON DELETE CASCADE,
-    embedding   real[]   NOT NULL CHECK (array_length(embedding, 1) = 768)
-);
-
 CREATE TABLE analysis_jobs (
-                               job_id               UUID PRIMARY KEY,
-                               song_id              INTEGER NOT NULL
-                                   REFERENCES songs(song_id)
-                                       ON DELETE CASCADE,
-                               status               VARCHAR(30) NOT NULL,
-                               error                TEXT,
-                               created_at           TIMESTAMP NOT NULL DEFAULT NOW(),
-                               updated_at           TIMESTAMP NOT NULL DEFAULT NOW()
+    job_id               UUID PRIMARY KEY,
+    song_id              INTEGER NOT NULL
+       REFERENCES songs(song_id)
+           ON DELETE CASCADE,
+    status               VARCHAR(30) NOT NULL,
+    error                TEXT,
+    created_at           TIMESTAMP NOT NULL DEFAULT NOW(),
+    updated_at           TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE song_analysis (
-                               song_id                INTEGER PRIMARY KEY
-                                   REFERENCES songs(song_id)
-                                       ON DELETE CASCADE,
-                               audio_length_seconds   DOUBLE PRECISION,
-                               musicnn                JSONB,
-                               discogs                JSONB,
-                               analyzed_at            TIMESTAMP NOT NULL DEFAULT NOW()
+    song_id                INTEGER PRIMARY KEY
+       REFERENCES songs(song_id)
+           ON DELETE CASCADE,
+    audio_length_seconds   DOUBLE PRECISION,
+    musicnn                JSONB,
+    discogs                JSONB,
+    analyzed_at            TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 
