@@ -1,62 +1,54 @@
-package musicservice.search;
+package musicservice.library;
 
+import musicservice.search.Item;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public class SearchRepository {
+public class LibraryRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public SearchRepository(JdbcTemplate jdbcTemplate) {
+    public LibraryRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public SearchResult findItemsByName(String name) {
-        String pattern = "%" + name + "%";
-
+    public Library findItemsByUserId(int id) {
         String sql = """
                 SELECT s.cover AS cover,
                        s.title AS name,
-                       s.song_id AS id,
                        'Track' AS type,
-                       u.username AS author
+                       u.username AS author,
+                       s.song_id AS id
                 FROM songs s
                 JOIN users u ON s.user_id = u.user_id
-                WHERE LOWER(s.title) LIKE LOWER(?)
-                   OR LOWER(u.username) LIKE LOWER(?)
+                WHERE s.user_id = ?
 
                 UNION ALL
 
                 SELECT p.cover AS cover,
                        p.title AS name,
-                       p.playlist_id AS id,
                        'Album' AS type,
-                       u.username AS author
+                       u.username AS author,
+                       p.playlist_id AS id
                 FROM playlists p
                 JOIN users u ON p.user_id = u.user_id
-                WHERE p.is_album = true
-                  AND (
-                      LOWER(p.title) LIKE LOWER(?)
-                      OR LOWER(u.username) LIKE LOWER(?)
-                  )
+                WHERE p.user_id = ?
+                  AND p.is_album = true
 
                 UNION ALL
 
                 SELECT p.cover AS cover,
                        p.title AS name,
-                       p.playlist_id AS id,
                        'Playlist' AS type,
-                       u.username AS author
+                       u.username AS author,
+                       p.playlist_id AS id
                 FROM playlists p
                 JOIN users u ON p.user_id = u.user_id
-                WHERE (p.is_album = false OR p.is_album IS NULL)
-                  AND (
-                      LOWER(p.title) LIKE LOWER(?)
-                      OR LOWER(u.username) LIKE LOWER(?)
-                  )
+                WHERE p.user_id = ?
+                  AND (p.is_album = false OR p.is_album IS NULL)
                 """;
 
         List<Item> items = jdbcTemplate.query(
@@ -68,12 +60,9 @@ public class SearchRepository {
                         rs.getString("author"),
                         rs.getInt("id")
                 ),
-                pattern, pattern,
-                pattern, pattern,
-                pattern, pattern
+                id, id, id
         );
 
-        return new SearchResult(items);
+        return new Library(items);
     }
-
 }

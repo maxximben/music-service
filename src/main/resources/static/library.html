@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Библиотека</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #121212;
+            color: white;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .top-panel {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-bottom: 25px;
+        }
+
+        .top-panel input {
+            flex: 1;
+            min-width: 220px;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 15px;
+            outline: none;
+        }
+
+        .top-panel button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #1db954;
+            color: white;
+            font-size: 15px;
+            cursor: pointer;
+        }
+
+        .top-panel button:hover {
+            background: #1ed760;
+        }
+
+        .message {
+            text-align: center;
+            color: #b3b3b3;
+            margin: 20px 0;
+        }
+
+        .loader {
+            text-align: center;
+            color: #1db954;
+            margin: 20px 0;
+            display: none;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #1e1e1e;
+            border-radius: 14px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+            transition: transform 0.15s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-3px);
+        }
+
+        .card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .no-cover {
+            width: 100%;
+            height: 220px;
+            background: #333;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+        }
+
+        .item-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .item-meta {
+            font-size: 14px;
+            color: #b3b3b3;
+            margin-bottom: 6px;
+        }
+
+        .item-type {
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 999px;
+            background: #2c2c2c;
+            color: #1db954;
+            font-size: 12px;
+            margin-bottom: 10px;
+        }
+
+        .item-id {
+            font-size: 13px;
+            color: #8a8a8a;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Библиотека пользователя</h1>
+
+    <div class="top-panel">
+        <input type="number" id="userIdInput" placeholder="Введите userId">
+        <input type="text" id="tokenInput" placeholder="Введите Authorization token">
+        <button onclick="loadLibrary()">Загрузить</button>
+    </div>
+
+    <div class="loader" id="loader">Загрузка...</div>
+    <div class="message" id="message">Введите userId и token</div>
+    <div class="results" id="results"></div>
+</div>
+
+<script>
+    async function loadLibrary() {
+        const userId = document.getElementById('userIdInput').value.trim();
+        const token = document.getElementById('tokenInput').value.trim();
+
+        const resultsContainer = document.getElementById('results');
+        const message = document.getElementById('message');
+        const loader = document.getElementById('loader');
+
+        resultsContainer.innerHTML = '';
+
+        if (!userId) {
+            message.textContent = 'Введите userId';
+            return;
+        }
+
+        if (!token) {
+            message.textContent = 'Введите Authorization token';
+            return;
+        }
+
+        message.textContent = '';
+        loader.style.display = 'block';
+
+        try {
+            const response = await fetch(`/library?userId=${encodeURIComponent(userId)}`, {
+                method: 'GET',
+                headers: {
+                    'Authorization': token
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error('Ошибка при загрузке библиотеки');
+            }
+
+            const data = await response.json();
+            loader.style.display = 'none';
+
+            if (!data.items || data.items.length === 0) {
+                message.textContent = 'Библиотека пуста';
+                return;
+            }
+
+            data.items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                const coverHtml = item.cover
+                    ? `<img src="${item.cover}" alt="${item.name}">`
+                    : `<div class="no-cover">Нет обложки</div>`;
+
+                card.innerHTML = `
+                    ${coverHtml}
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-type">${item.type}</div>
+                    <div class="item-meta">Автор: ${item.author ?? 'Неизвестен'}</div>
+                    <div class="item-id">ID: ${item.id}</div>
+                `;
+
+                resultsContainer.appendChild(card);
+            });
+        } catch (error) {
+            loader.style.display = 'none';
+            message.textContent = 'Не удалось загрузить библиотеку';
+            console.error(error);
+        }
+    }
+
+    document.getElementById('userIdInput').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            loadLibrary();
+        }
+    });
+
+    document.getElementById('tokenInput').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            loadLibrary();
+        }
+    });
+</script>
+</body>
+</html>

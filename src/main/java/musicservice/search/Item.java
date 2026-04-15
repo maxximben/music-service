@@ -1,6 +1,6 @@
 package musicservice.search;
 
-public record SearchItem (
+public record Item(
         String cover,
         String name,
         String type,
