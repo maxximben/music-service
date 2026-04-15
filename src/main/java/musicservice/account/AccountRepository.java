@@ -45,6 +45,11 @@ public class AccountRepository {
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, email));
     }
 
+    public int getIdByEmail(String email) {
+        String sql = "select user_id from users where email = ?";
+        return jdbcTemplate.queryForObject(sql, userId(), email);
+    }
+
     private RowMapper<User> userRawMapper() {
         return (rs, rowNum) -> new User(
                 rs.getString("username"),
@@ -53,5 +58,9 @@ public class AccountRepository {
                 rs.getBoolean("is_artist"),
                 rs.getString("email")
         );
+    }
+
+    private RowMapper<Integer> userId() {
+        return (rs, rowNum) -> rs.getInt("user_id");
     }
 }

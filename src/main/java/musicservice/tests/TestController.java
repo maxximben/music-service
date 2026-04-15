@@ -140,4 +140,9 @@ public class TestController {
     public Playlist getPlaylistById(@RequestParam int id) {
         return playlistRepository.getPlaylistById(id);
     }
+
+    @GetMapping("/get-id-by-email")
+    public int getIdByEmail(@RequestParam String email) {
+        return accountRepository.getIdByEmail(email);
+    }
 }
