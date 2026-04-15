@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Поиск музыки</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: #121212;
+            color: white;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .search-box button {
+            padding: 14px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #1db954;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        .search-box button:hover {
+            background: #1ed760;
+        }
+
+        .results {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #1e1e1e;
+            border-radius: 14px;
+            padding: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .card img {
+            width: 100%;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 12px;
+        }
+
+        .no-cover {
+            width: 100%;
+            height: 220px;
+            border-radius: 10px;
+            margin-bottom: 12px;
+            background: #333;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #aaa;
+            font-size: 14px;
+        }
+
+        .item-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .item-type {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 20px;
+            background: #2a2a2a;
+            color: #1db954;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .item-author {
+            color: #b3b3b3;
+            font-size: 14px;
+        }
+
+        .message {
+            text-align: center;
+            color: #b3b3b3;
+            margin-top: 20px;
+            font-size: 16px;
+        }
+
+        .loader {
+            text-align: center;
+            margin-top: 20px;
+            color: #1db954;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Поиск треков, альбомов и плейлистов</h1>
+
+    <div class="search-box">
+        <input type="text" id="searchInput" placeholder="Введите название или автора...">
+        <button onclick="searchItems()">Найти</button>
+    </div>
+
+    <div class="loader" id="loader">Загрузка...</div>
+    <div class="message" id="message">Введите запрос для поиска</div>
+    <div class="results" id="results"></div>
+</div>
+
+<script>
+    async function searchItems() {
+        const query = document.getElementById('searchInput').value.trim();
+        const resultsContainer = document.getElementById('results');
+        const message = document.getElementById('message');
+        const loader = document.getElementById('loader');
+
+        resultsContainer.innerHTML = '';
+
+        if (!query) {
+            message.textContent = 'Введите запрос для поиска';
+            return;
+        }
+
+        message.textContent = '';
+        loader.style.display = 'block';
+
+        try {
+            const response = await fetch(`/search?request=${encodeURIComponent(query)}`);
+
+            if (!response.ok) {
+                throw new Error('Ошибка при выполнении запроса');
+            }
+
+            const data = await response.json();
+            loader.style.display = 'none';
+
+            if (!data.items || data.items.length === 0) {
+                message.textContent = 'Ничего не найдено';
+                return;
+            }
+
+            data.items.forEach(item => {
+                const card = document.createElement('div');
+                card.className = 'card';
+
+                const coverHtml = item.cover
+                    ? `<img src="${item.cover}" alt="${item.name}">`
+                    : `<div class="no-cover">Нет обложки</div>`;
+
+                card.innerHTML = `
+                    ${coverHtml}
+                    <div class="item-name">${item.name}</div>
+                    <div class="item-type">${item.type}</div>
+                    <div class="item-author">Автор: ${item.author ?? 'Неизвестен'}</div>
+                `;
+
+                resultsContainer.appendChild(card);
+            });
+        } catch (error) {
+            loader.style.display = 'none';
+            message.textContent = 'Ошибка загрузки результатов';
+            console.error(error);
+        }
+    }
+
+    document.getElementById('searchInput').addEventListener('keydown', function(event) {
+        if (event.key === 'Enter') {
+            searchItems();
+        }
+    });
+</script>
+</body>
+</html>
