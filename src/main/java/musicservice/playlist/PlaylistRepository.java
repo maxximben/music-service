@@ -88,19 +88,45 @@ public class PlaylistRepository {
         jdbcTemplate.update(query, url, playlistId);
     }
 
-    public void setTitle(String title, int playlistId) {
-        String query = "update playlists set title = ? where playlist_id = ?";
-        jdbcTemplate.update(query, title, playlistId);
+    public boolean setTitle(String title, int playlistId, int userId) {
+        String query = "update playlists set title = ? where playlist_id = ? and user_id = ?";
+        return jdbcTemplate.update(query, title, playlistId, userId) > 0;
     }
 
     public void addSong(int songId, int playlistId) {
-        String query = "INSERT INTO playlist_songs (playlist_id, song_id, position) SELECT ?, ?, COALESCE(MAX(position), 0) + 1 FROM playlist_songs WHERE playlist_id = ?";
+        String query = """
+                INSERT INTO playlist_songs (playlist_id, song_id, position)
+                SELECT ?, ?, COALESCE(MAX(position), 0) + 1
+                FROM playlist_songs
+                WHERE playlist_id = ?
+                ON CONFLICT (playlist_id, song_id) DO NOTHING
+                """;
         jdbcTemplate.update(query, playlistId, songId, playlistId);
+        syncSongCount(playlistId);
     }
 
     public void deleteSong(int songId, int playlistId) {
         String query = "delete from playlist_songs where playlist_id = ? and song_id = ?";
         jdbcTemplate.update(query, playlistId, songId);
+        syncSongCount(playlistId);
+    }
+
+    public boolean addSong(int songId, int playlistId, int userId) {
+        if (!isPlaylistOwner(playlistId, userId)) {
+            return false;
+        }
+
+        addSong(songId, playlistId);
+        return true;
+    }
+
+    public boolean deleteSong(int songId, int playlistId, int userId) {
+        if (!isPlaylistOwner(playlistId, userId)) {
+            return false;
+        }
+
+        deleteSong(songId, playlistId);
+        return true;
     }
 
     public boolean deletePlaylist(int playlistId, int userId) {
@@ -111,6 +137,24 @@ public class PlaylistRepository {
     public Playlist getPlaylistById(int id) {
         String query = "select * from playlists where playlist_id = ?";
         return jdbcTemplate.queryForObject(query, playlistRowMapper(), id);
+    }
+
+    private boolean isPlaylistOwner(int playlistId, int userId) {
+        String query = "select exists(select 1 from playlists where playlist_id = ? and user_id = ?)";
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(query, Boolean.class, playlistId, userId));
+    }
+
+    private void syncSongCount(int playlistId) {
+        String query = """
+                UPDATE playlists
+                SET count_of_songs = (
+                    SELECT COUNT(*)
+                    FROM playlist_songs
+                    WHERE playlist_id = ?
+                )
+                WHERE playlist_id = ?
+                """;
+        jdbcTemplate.update(query, playlistId, playlistId);
     }
 
     public RowMapper<Playlist> playlistRowMapper() {

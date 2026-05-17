@@ -65,13 +65,38 @@ public class PlaylistController {
     }
 
     @PatchMapping("/set-title")
-    public void setTitle(@RequestParam String title, @RequestParam int playlistId, @RequestHeader(value = "Authorization") String authHeader) {
-        playlistService.setTitle(title, playlistId);
+    public ResponseEntity<?> setTitle(
+            @RequestParam String title,
+            @RequestParam int playlistId,
+            @RequestHeader(value = "Authorization") String authHeader
+    ) {
+        String nextTitle = title == null ? "" : title.trim();
+        if (nextTitle.isEmpty()) {
+            return ResponseEntity.badRequest().body("Название плейлиста не может быть пустым");
+        }
+
+        int userId = resolveUserId(authHeader);
+        Playlist playlist = playlistService.setTitle(nextTitle, playlistId, userId);
+        if (playlist == null) {
+            return ResponseEntity.status(403).body("Плейлист не найден или принадлежит другому пользователю");
+        }
+
+        return ResponseEntity.ok(playlist);
     }
 
     @PatchMapping("/add-song")
-    public void addSong(@RequestParam int songId, @RequestParam int playlistId, @RequestHeader(value = "Authorization") String authHeader) {
-        playlistService.addSong(songId, playlistId);
+    public ResponseEntity<?> addSong(
+            @RequestParam int songId,
+            @RequestParam int playlistId,
+            @RequestHeader(value = "Authorization") String authHeader
+    ) {
+        int userId = resolveUserId(authHeader);
+        Playlist playlist = playlistService.addSong(songId, playlistId, userId);
+        if (playlist == null) {
+            return ResponseEntity.status(403).body("Плейлист не найден или принадлежит другому пользователю");
+        }
+
+        return ResponseEntity.ok(playlist);
     }
 
     @PatchMapping("/update")
@@ -80,11 +105,18 @@ public class PlaylistController {
     }
 
     @DeleteMapping("/delete-song")
-    public void deletePlaylist(@RequestParam int songId, @RequestParam int playlistId, @RequestHeader(value = "Authorization") String authHeader) {
+    public ResponseEntity<?> deleteSong(
+            @RequestParam int songId,
+            @RequestParam int playlistId,
+            @RequestHeader(value = "Authorization") String authHeader
+    ) {
+        int userId = resolveUserId(authHeader);
+        Playlist playlist = playlistService.deleteSong(songId, playlistId, userId);
+        if (playlist == null) {
+            return ResponseEntity.status(403).body("Плейлист не найден или принадлежит другому пользователю");
+        }
 
-        String token = authHeader.substring(7);   // доделать
-
-        playlistService.deleteSong(songId, playlistId);
+        return ResponseEntity.ok(playlist);
     }
 
     @DeleteMapping

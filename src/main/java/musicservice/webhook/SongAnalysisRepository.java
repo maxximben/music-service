@@ -44,7 +44,7 @@ public class SongAnalysisRepository {
                 FROM similarities
                 WHERE similarity > 0
                 ORDER BY similarity DESC, song_id
-                LIMIT 20
+                LIMIT 10
                 """;
 
         return jdbcTemplate.query(

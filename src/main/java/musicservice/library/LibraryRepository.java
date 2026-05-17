@@ -47,8 +47,16 @@ public class LibraryRepository {
                        p.playlist_id AS id
                 FROM playlists p
                 JOIN users u ON p.user_id = u.user_id
-                WHERE p.user_id = ?
-                  AND p.is_album = true
+                WHERE p.is_album = true
+                  AND (
+                      p.user_id = ?
+                      OR EXISTS (
+                          SELECT 1
+                          FROM users_playlists up
+                          WHERE up.playlist_id = p.playlist_id
+                            AND up.user_id = ?
+                      )
+                  )
 
                 UNION ALL
 
@@ -72,9 +80,23 @@ public class LibraryRepository {
                         rs.getString("author"),
                         rs.getInt("id")
                 ),
-                id, id, id
+                id, id, id, id
         );
 
         return new Library(items);
+    }
+
+    public boolean albumExists(int albumId) {
+        String query = "select exists(select 1 from playlists where playlist_id = ? and is_album = true)";
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(query, Boolean.class, albumId));
+    }
+
+    public void addAlbumToLibrary(int userId, int albumId) {
+        String query = """
+                INSERT INTO users_playlists (user_id, playlist_id, is_owner, added_at)
+                VALUES (?, ?, false, NOW())
+                ON CONFLICT (user_id, playlist_id) DO NOTHING
+                """;
+        jdbcTemplate.update(query, userId, albumId);
     }
 }
