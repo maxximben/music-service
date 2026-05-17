@@ -1,11 +1,13 @@
 package musicservice.song;
 
+import java.util.List;
+
 public record Song (
         int songId,
         String title,
-        int userId,
         String cover,
         String url,
-        int duration,
-        String author
+        Integer duration,
+        String author,
+        List<String> authors
 ) {}

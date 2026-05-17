@@ -1,4 +1,13 @@
-INSERT INTO songs (title, user_id, album, cover, url, duration) VALUES
+CREATE TEMP TABLE song_import (
+    title TEXT,
+    author_user_id INTEGER,
+    album TEXT,
+    cover TEXT,
+    url TEXT,
+    duration INTEGER
+);
+
+INSERT INTO song_import (title, author_user_id, album, cover, url, duration) VALUES
     (
         '[I Just] Died In Your Arms',
         (SELECT user_id FROM users WHERE username = 'Cutting Crew - Topic'),
@@ -288,3 +297,17 @@ INSERT INTO songs (title, user_id, album, cover, url, duration) VALUES
         'https://s3.twcstorage.ru/dff2fb2a-f4c1-4ba0-a0ef-42aab0ae6870/audio/ZXKAI%20%E2%80%93%20NO%20BATID%C3%83O%20(Slowed).m4a',
         NULL
     );
+
+INSERT INTO songs (title, album, cover, url, duration)
+SELECT title, album, cover, url, duration
+FROM song_import;
+
+INSERT INTO song_authors (song_id, user_id, author_order)
+SELECT s.song_id, si.author_user_id, 1
+FROM song_import si
+JOIN songs s ON s.title IS NOT DISTINCT FROM si.title
+           AND s.url IS NOT DISTINCT FROM si.url
+WHERE si.author_user_id IS NOT NULL
+ON CONFLICT (song_id, user_id) DO NOTHING;
+
+DROP TABLE song_import;

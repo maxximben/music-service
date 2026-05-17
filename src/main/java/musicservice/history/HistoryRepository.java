@@ -40,14 +40,21 @@ public class HistoryRepository {
 
     public SearchResult getSearchHistoryByUserId(int userId) {
         String sql = """
+                WITH track_authors AS (
+                    SELECT sa.song_id,
+                           string_agg(u.username, ', ' ORDER BY sa.author_order, u.username) AS author
+                    FROM song_authors sa
+                    JOIN users u ON u.user_id = sa.user_id
+                    GROUP BY sa.song_id
+                )
                 SELECT s.cover AS cover,
                        s.title AS name,
                        'Track' AS type,
-                       u.username AS author,
+                       COALESCE(ta.author, '') AS author,
                        s.song_id AS id
                 FROM listening_history h
                 JOIN songs s ON h.song_id = s.song_id
-                JOIN users u ON s.user_id = u.user_id
+                LEFT JOIN track_authors ta ON ta.song_id = s.song_id
                 WHERE h.user_id = ?
                 ORDER BY h.played_at DESC, h.history_id DESC
                 LIMIT 30

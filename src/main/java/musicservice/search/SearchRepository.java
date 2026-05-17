@@ -18,15 +18,22 @@ public class SearchRepository {
         String pattern = "%" + name + "%";
 
         String sql = """
+                WITH track_authors AS (
+                    SELECT sa.song_id,
+                           string_agg(u.username, ', ' ORDER BY sa.author_order, u.username) AS author
+                    FROM song_authors sa
+                    JOIN users u ON u.user_id = sa.user_id
+                    GROUP BY sa.song_id
+                )
                 SELECT s.cover AS cover,
                        s.title AS name,
                        s.song_id AS id,
                        'Track' AS type,
-                       u.username AS author
+                       COALESCE(ta.author, '') AS author
                 FROM songs s
-                JOIN users u ON s.user_id = u.user_id
+                LEFT JOIN track_authors ta ON ta.song_id = s.song_id
                 WHERE LOWER(s.title) LIKE LOWER(?)
-                   OR LOWER(u.username) LIKE LOWER(?)
+                   OR LOWER(COALESCE(ta.author, '')) LIKE LOWER(?)
 
                 UNION ALL
 

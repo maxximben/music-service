@@ -9,8 +9,9 @@ public class PlaylistService {
     @Autowired
     PlaylistRepository playlistRepository;
 
-    public void createPlaylist(String title, int userId) {
-        playlistRepository.createPlaylist(title, userId);
+    public Playlist createPlaylist(String title, int userId) {
+        int playlistId = playlistRepository.createPlaylist(title, userId);
+        return playlistRepository.getPlaylistById(playlistId);
     }
 
     public void setPlaylistCover(String url, int playlistId) {
@@ -28,6 +29,10 @@ public class PlaylistService {
 
     public void deleteSong(int songId, int playlistId) {
         playlistRepository.deleteSong(songId, playlistId);
+    }
+
+    public boolean deletePlaylist(int playlistId, int userId) {
+        return playlistRepository.deletePlaylist(playlistId, userId);
     }
 
     public Playlist getPlaylistById(int id) {

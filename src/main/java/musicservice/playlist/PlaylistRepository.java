@@ -9,7 +9,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.PreparedStatement;
-import java.sql.Statement;
 import java.util.List;
 import java.util.Map;
 
@@ -22,9 +21,26 @@ public class PlaylistRepository {
     @Autowired
     private SongRepository songRepository;
 
-    public void createPlaylist(String title, int userId) {
+    public int createPlaylist(String title, int userId) {
         String query = "insert into playlists (title, user_id, is_album, is_private, count_of_songs) values (?, ?, ?, ?, ?)";
-        jdbcTemplate.update(query, title, userId, false, true, 0);
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(query, new String[]{"playlist_id"});
+            ps.setString(1, title);
+            ps.setInt(2, userId);
+            ps.setBoolean(3, false);
+            ps.setBoolean(4, true);
+            ps.setInt(5, 0);
+            return ps;
+        }, keyHolder);
+
+        Map<String, Object> keys = keyHolder.getKeys();
+        if (keys == null || keys.get("playlist_id") == null) {
+            throw new IllegalStateException("Не удалось получить id созданного плейлиста");
+        }
+
+        return ((Number) keys.get("playlist_id")).intValue();
     }
 
     public int createPlaylistWithSongs(String title, int userId, List<Integer> songIds) {
@@ -85,6 +101,11 @@ public class PlaylistRepository {
     public void deleteSong(int songId, int playlistId) {
         String query = "delete from playlist_songs where playlist_id = ? and song_id = ?";
         jdbcTemplate.update(query, playlistId, songId);
+    }
+
+    public boolean deletePlaylist(int playlistId, int userId) {
+        String query = "delete from playlists where playlist_id = ? and user_id = ?";
+        return jdbcTemplate.update(query, playlistId, userId) > 0;
     }
 
     public Playlist getPlaylistById(int id) {

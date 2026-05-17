@@ -1,7 +1,7 @@
 package musicservice.playlist;
 
-import io.swagger.v3.oas.annotations.Parameter;
-import io.swagger.v3.oas.annotations.enums.ParameterIn;
+import musicservice.account.AccountRepository;
+import musicservice.jwt.JwtUtils;
 import musicservice.s3.S3Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +21,41 @@ public class PlaylistController {
     @Autowired
     S3Service s3Service;
 
+    @Autowired
+    AccountRepository accountRepository;
+
+    @Autowired
+    JwtUtils jwtUtils;
+
     @PostMapping("/create")
-    public void createPlaylist(@RequestBody CreatePlaylistRequest request) {
-        playlistService.createPlaylist(request.title(), request.userId());
+    public ResponseEntity<?> createPlaylist(
+            @RequestBody CreatePlaylistRequest request,
+            @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        String title = request.title() == null ? "" : request.title().trim();
+        if (title.isEmpty()) {
+            return ResponseEntity.badRequest().body("Название плейлиста не может быть пустым");
+        }
+
+        int userId = resolveUserId(request, authHeader);
+        return ResponseEntity.ok(playlistService.createPlaylist(title, userId));
+    }
+
+    private int resolveUserId(CreatePlaylistRequest request, String authHeader) {
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            return resolveUserId(authHeader);
+        }
+
+        if (request.userId() != null) {
+            return request.userId();
+        }
+
+        throw new IllegalArgumentException("Не удалось определить пользователя");
+    }
+
+    private int resolveUserId(String authHeader) {
+        String email = jwtUtils.getEmailFromToken(authHeader.substring(7));
+        return accountRepository.getIdByEmail(email);
     }
 
     @PatchMapping("/set-cover")
@@ -53,6 +85,21 @@ public class PlaylistController {
         String token = authHeader.substring(7);   // доделать
 
         playlistService.deleteSong(songId, playlistId);
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deletePlaylist(
+            @RequestParam int playlistId,
+            @RequestHeader(value = "Authorization") String authHeader
+    ) {
+        int userId = resolveUserId(authHeader);
+        boolean deleted = playlistService.deletePlaylist(playlistId, userId);
+
+        if (!deleted) {
+            return ResponseEntity.status(403).body("Плейлист не найден или принадлежит другому пользователю");
+        }
+
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping

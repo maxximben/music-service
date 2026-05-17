@@ -7,14 +7,23 @@ INSERT INTO users (username, avatar, password, is_artist, email) VALUES
     (' indie_heart',      'https://i.pravatar.cc/150?u=5',  '$2a$12$YS8as6ETJashdEj6Ph4r/e5zmD/lc0RTkUb6EQbel/YMElSRB2O8G', false, 'indie.soul@yandex.ru');
 
 
--- 2. Треки (привязываем к артистам — user_id 1 и 3)
-INSERT INTO songs (title, user_id, album, cover, url, duration) VALUES
-    ('Neon Rain',         1, 'Midnight City',    'https://picsum.photos/seed/neonrain/300/300',    'https://s3.twcstorage.ru/dff2fb2a-f4c1-4ba0-a0ef-42aab0ae6870/audio/1770212025622_Never%20Gonna%20Give%20You%20Up%20-%20Rick%20Astley.mp3',     218),
-    ('Broken Orbit',      1, 'Midnight City',    'https://picsum.photos/seed/neonrain/300/300',    'https://s3.twcstorage.ru/dff2fb2a-f4c1-4ba0-a0ef-42aab0ae6870/audio/1770212025622_Never%20Gonna%20Give%20You%20Up%20-%20Rick%20Astley.mp3',   187),
-    ('Afterimage',        1, NULL,                'https://picsum.photos/seed/afterimage/300/300',  'https://s3.twcstorage.ru/dff2fb2a-f4c1-4ba0-a0ef-42aab0ae6870/audio/1770212025622_Never%20Gonna%20Give%20You%20Up%20-%20Rick%20Astley.mp3',       245),
-    ('Echoes in Dust',    3, 'Black Geometry',   'https://picsum.photos/seed/blackgeo/300/300',    'https://s3.twcstorage.ru/dff2fb2a-f4c1-4ba0-a0ef-42aab0ae6870/audio/1770212025622_Never%20Gonna%20Give%20You%20Up%20-%20Rick%20Astley.mp3',      304),
-    ('Voidwalker',        3, 'Black Geometry',   'https://picsum.photos/seed/blackgeo/300/300',    'https://s3.twcstorage.ru/dff2fb2a-f4c1-4ba0-a0ef-42aab0ae6870/audio/1770212025622_Never%20Gonna%20Give%20You%20Up%20-%20Rick%20Astley.mp3',       276),
-    ('Fading Horizon',    3, NULL,                NULL,                                              'https://s3.twcstorage.ru/dff2fb2a-f4c1-4ba0-a0ef-42aab0ae6870/audio/1770212025622_Never%20Gonna%20Give%20You%20Up%20-%20Rick%20Astley.mp3',   195);
+-- 2. Треки
+INSERT INTO songs (title, album, cover, url, duration) VALUES
+    ('Neon Rain',         'Midnight City',    'https://picsum.photos/seed/neonrain/300/300',    'https://s3.twcstorage.ru/dff2fb2a-f4c1-4ba0-a0ef-42aab0ae6870/audio/1770212025622_Never%20Gonna%20Give%20You%20Up%20-%20Rick%20Astley.mp3',     218),
+    ('Broken Orbit',      'Midnight City',    'https://picsum.photos/seed/neonrain/300/300',    'https://s3.twcstorage.ru/dff2fb2a-f4c1-4ba0-a0ef-42aab0ae6870/audio/1770212025622_Never%20Gonna%20Give%20You%20Up%20-%20Rick%20Astley.mp3',   187),
+    ('Afterimage',        NULL,                'https://picsum.photos/seed/afterimage/300/300',  'https://s3.twcstorage.ru/dff2fb2a-f4c1-4ba0-a0ef-42aab0ae6870/audio/1770212025622_Never%20Gonna%20Give%20You%20Up%20-%20Rick%20Astley.mp3',       245),
+    ('Echoes in Dust',    'Black Geometry',   'https://picsum.photos/seed/blackgeo/300/300',    'https://s3.twcstorage.ru/dff2fb2a-f4c1-4ba0-a0ef-42aab0ae6870/audio/1770212025622_Never%20Gonna%20Give%20You%20Up%20-%20Rick%20Astley.mp3',      304),
+    ('Voidwalker',        'Black Geometry',   'https://picsum.photos/seed/blackgeo/300/300',    'https://s3.twcstorage.ru/dff2fb2a-f4c1-4ba0-a0ef-42aab0ae6870/audio/1770212025622_Never%20Gonna%20Give%20You%20Up%20-%20Rick%20Astley.mp3',       276),
+    ('Fading Horizon',    NULL,                NULL,                                              'https://s3.twcstorage.ru/dff2fb2a-f4c1-4ba0-a0ef-42aab0ae6870/audio/1770212025622_Never%20Gonna%20Give%20You%20Up%20-%20Rick%20Astley.mp3',   195);
+
+INSERT INTO song_authors (song_id, user_id, author_order) VALUES
+    (1, 1, 1),
+    (2, 1, 1),
+    (2, 3, 2),
+    (3, 1, 1),
+    (4, 3, 1),
+    (5, 3, 1),
+    (6, 3, 1);
 
 
 -- 3. Плейлисты
